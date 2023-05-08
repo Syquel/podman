@@ -5,7 +5,6 @@ import (
 	"github.com/containers/podman/v4/pkg/bindings/internal/util"
 	"net"
 	"net/url"
-	"reflect"
 )
 
 // Changed returns true if named field has been set

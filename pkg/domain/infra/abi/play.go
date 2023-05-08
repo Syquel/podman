@@ -420,11 +420,12 @@ func (ic *ContainerEngine) playKubePod(ctx context.Context, podName string, podY
 	}
 
 	var publishAllPorts bool
-	if options.PublishAllPorts == types.OptionalBoolUndefined || options.PublishAllPorts == types.OptionalBoolTrue {
+	switch options.PublishAllPorts {
+	case types.OptionalBoolUndefined, types.OptionalBoolTrue:
 		publishAllPorts = true
-	} else if options.PublishAllPorts == types.OptionalBoolFalse {
+	case types.OptionalBoolFalse:
 		publishAllPorts = false
-	} else {
+	default:
 		publishAllPorts = true
 	}
 
