@@ -38,7 +38,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func ToPodOpt(ctx context.Context, podName string, p entities.PodCreateOptions, podYAML *v1.PodTemplateSpec) (entities.PodCreateOptions, error) {
+func ToPodOpt(ctx context.Context, podName string, p entities.PodCreateOptions, podYAML *v1.PodTemplateSpec, publishAllPorts bool) (entities.PodCreateOptions, error) {
 	p.Net = &entities.NetOptions{NoHosts: p.Net.NoHosts}
 
 	p.Name = podName
@@ -77,7 +77,7 @@ func ToPodOpt(ctx context.Context, podName string, p entities.PodCreateOptions, 
 		}
 		p.Net.AddHosts = hosts
 	}
-	podPorts := getPodPorts(podYAML.Spec.Containers)
+	podPorts := getPodPorts(podYAML.Spec.Containers, publishAllPorts)
 	p.Net.PublishPorts = podPorts
 
 	if dnsConfig := podYAML.Spec.DNSConfig; dnsConfig != nil {
@@ -1044,10 +1044,13 @@ func getContainerResources(container v1.Container) (v1.ResourceRequirements, err
 
 // getPodPorts converts a slice of kube container descriptions to an
 // array of portmapping
-func getPodPorts(containers []v1.Container) []types.PortMapping {
+func getPodPorts(containers []v1.Container, publishAllPorts bool) []types.PortMapping {
 	var infraPorts []types.PortMapping
 	for _, container := range containers {
 		for _, p := range container.Ports {
+			if p.HostPort == 0 && !publishAllPorts {
+				continue
+			}
 			if p.HostPort != 0 && p.ContainerPort == 0 {
 				p.ContainerPort = p.HostPort
 			}

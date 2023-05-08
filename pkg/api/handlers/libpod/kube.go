@@ -29,6 +29,7 @@ func KubePlay(w http.ResponseWriter, r *http.Request) {
 		StaticMACs       []string          `schema:"staticMACs"`
 		NoHosts          bool              `schema:"noHosts"`
 		PublishPorts     []string          `schema:"publishPorts"`
+		PublishAllPorts  bool              `schema:"publishAllPorts"`
 		Wait             bool              `schema:"wait"`
 		ServiceContainer bool              `schema:"serviceContainer"`
 	}{
@@ -106,6 +107,9 @@ func KubePlay(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, found := r.URL.Query()["start"]; found {
 		options.Start = types.NewOptionalBool(query.Start)
+	}
+	if _, found := r.URL.Query()["publishAllPorts"]; found {
+		options.PublishAllPorts = types.NewOptionalBool(query.PublishAllPorts)
 	}
 	report, err := containerEngine.PlayKube(r.Context(), r.Body, options)
 	if err != nil {

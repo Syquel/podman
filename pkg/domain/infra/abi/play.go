@@ -418,7 +418,17 @@ func (ic *ContainerEngine) playKubePod(ctx context.Context, podName string, podY
 		Net:        &entities.NetOptions{NoHosts: options.NoHosts},
 		ExitPolicy: string(config.PodExitPolicyStop),
 	}
-	podOpt, err = kube.ToPodOpt(ctx, podName, podOpt, podYAML)
+
+	var publishAllPorts bool
+	if options.PublishAllPorts == types.OptionalBoolUndefined || options.PublishAllPorts == types.OptionalBoolTrue {
+		publishAllPorts = true
+	} else if options.PublishAllPorts == types.OptionalBoolFalse {
+		publishAllPorts = false
+	} else {
+		publishAllPorts = true
+	}
+
+	podOpt, err = kube.ToPodOpt(ctx, podName, podOpt, podYAML, publishAllPorts)
 	if err != nil {
 		return nil, nil, err
 	}

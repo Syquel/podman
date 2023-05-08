@@ -32,12 +32,13 @@ import (
 type playKubeOptionsWrapper struct {
 	entities.PlayKubeOptions
 
-	TLSVerifyCLI   bool
-	CredentialsCLI string
-	StartCLI       bool
-	BuildCLI       bool
-	annotations    []string
-	macs           []string
+	TLSVerifyCLI       bool
+	CredentialsCLI     string
+	StartCLI           bool
+	BuildCLI           bool
+	annotations        []string
+	macs               []string
+	PublishAllPortsCLI bool
 }
 
 var (
@@ -158,6 +159,8 @@ func playFlags(cmd *cobra.Command) {
 	flags.StringSliceVar(&playOptions.PublishPorts, publishPortsFlagName, []string{}, "Publish a container's port, or a range of ports, to the host")
 	_ = cmd.RegisterFlagCompletionFunc(publishPortsFlagName, completion.AutocompleteNone)
 
+	flags.BoolVar(&playOptions.PublishAllPortsCLI, "publish-all", true, "Publish all defined container ports to the host")
+
 	waitFlagName := "wait"
 	flags.BoolVarP(&playOptions.Wait, waitFlagName, "w", false, "Clean up all objects created when a SIGTERM is received or pods exit")
 
@@ -212,6 +215,9 @@ func play(cmd *cobra.Command, args []string) error {
 	}
 	if cmd.Flags().Changed("build") {
 		playOptions.Build = types.NewOptionalBool(playOptions.BuildCLI)
+	}
+	if cmd.Flags().Changed("publish-all") {
+		playOptions.PublishAllPorts = types.NewOptionalBool(playOptions.PublishAllPortsCLI)
 	}
 	if playOptions.Authfile != "" {
 		if _, err := os.Stat(playOptions.Authfile); err != nil {
